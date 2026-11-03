@@ -43,6 +43,7 @@ function submitBehavior() {
 
 function loadStudent(name) {
   document.getElementById('main-view').classList.add('hidden');
+  document.getElementById('global-data-view').classList.add('hidden');
   document.getElementById('student-view').classList.remove('hidden');
   document.getElementById('student-title').innerText = `${name}'s Behaviors`;
   document.getElementById('student-behavior-list').innerHTML = '<li>Loading...</li>';
@@ -54,6 +55,11 @@ function loadStudent(name) {
 
 function goBack() {
   document.getElementById('student-view').classList.add('hidden');
+  document.getElementById('main-view').classList.remove('hidden');
+}
+
+function goBackFromGlobal() {
+  document.getElementById('global-data-view').classList.add('hidden');
   document.getElementById('main-view').classList.remove('hidden');
 }
 
@@ -77,15 +83,14 @@ function renderStudentView(data) {
     </li>
   `).join('');
 
-  renderCharts(data);
+  renderStudentCharts(data);
 }
 
-function renderCharts(data) {
+function renderStudentCharts(data) {
   ['pieChart', 'timeChart', 'dayChart'].forEach(id => {
     if (charts[id]) charts[id].destroy();
   });
 
-  // 1. Pie Chart
   const pieCtx = document.getElementById('pieChart').getContext('2d');
   charts['pieChart'] = new Chart(pieCtx, {
     type: 'pie',
@@ -101,12 +106,9 @@ function renderCharts(data) {
 
   data.timestamps.forEach(ts => {
     const d = new Date(ts.time);
-    
-    // Day calculation (Mon=0 to Fri=4)
     const day = d.getDay();
     if (day >= 1 && day <= 5) dayBins[day - 1]++;
     
-    // Time calculation (8:00 to 15:30)
     const h = d.getHours();
     const m = d.getMinutes();
     if (h >= 8 && h <= 15) {
@@ -117,7 +119,6 @@ function renderCharts(data) {
     }
   });
 
-  // 2. Time Bins Chart
   const timeLabels = Array.from({length: 31}, (_, i) => {
     const mins = i * 15;
     const h = 8 + Math.floor(mins / 60);
@@ -135,13 +136,94 @@ function renderCharts(data) {
     options: { responsive: true, maintainAspectRatio: false }
   });
 
-  // 3. Day of Week Chart
   const dayCtx = document.getElementById('dayChart').getContext('2d');
   charts['dayChart'] = new Chart(dayCtx, {
     type: 'bar',
     data: {
       labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
       datasets: [{ label: 'Incidents by Day', data: dayBins, backgroundColor: '#8b5cf6' }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+}
+
+function loadGlobalBehaviorData() {
+  document.getElementById('main-view').classList.add('hidden');
+  document.getElementById('global-data-view').classList.remove('hidden');
+
+  fetch(`${API_URL}?action=getGlobalBehaviorData`)
+    .then(res => res.json())
+    .then(renderGlobalCharts);
+}
+
+function renderGlobalCharts(data) {
+  ['globalStudentsPerBehaviorChart', 'globalInstancesPerBehaviorChart', 'globalGradePrevalenceChart', 'globalTimeOfDayChart'].forEach(id => {
+    if (charts[id]) charts[id].destroy();
+  });
+
+  const colorPalette = [
+    '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', 
+    '#6366f1', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'
+  ];
+
+  // 1. Students Per Behavior
+  const spbCtx = document.getElementById('globalStudentsPerBehaviorChart').getContext('2d');
+  charts['globalStudentsPerBehaviorChart'] = new Chart(spbCtx, {
+    type: 'bar',
+    data: {
+      labels: data.behaviorNames,
+      datasets: [{ label: 'Students assigned per Behavior', data: data.studentsPerBehavior, backgroundColor: '#3b82f6' }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+
+  // 2. Instances Per Behavior
+  const ipbCtx = document.getElementById('globalInstancesPerBehaviorChart').getContext('2d');
+  charts['globalInstancesPerBehaviorChart'] = new Chart(ipbCtx, {
+    type: 'bar',
+    data: {
+      labels: data.behaviorNames,
+      datasets: [{ label: 'Total Instances across all Students', data: data.instancesPerBehavior, backgroundColor: '#8b5cf6' }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+
+  // 3. Prevalence by Grade Level (Stacked Bar Chart)
+  const gradeCtx = document.getElementById('globalGradePrevalenceChart').getContext('2d');
+  const gradeDatasets = data.behaviorNames.map((bName, idx) => ({
+    label: bName,
+    data: data.gradePrevalence.data[bName] || [],
+    backgroundColor: colorPalette[idx % colorPalette.length]
+  }));
+
+  charts['globalGradePrevalenceChart'] = new Chart(gradeCtx, {
+    type: 'bar',
+    data: {
+      labels: data.gradePrevalence.grades,
+      datasets: gradeDatasets
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { title: { display: true, text: 'Behavior Prevalence by Grade Level' } },
+      scales: { x: { stacked: true }, y: { stacked: true } }
+    }
+  });
+
+  // 4. Time of Day (8:00 - 3:30, 15m intervals)
+  const timeLabels = Array.from({length: 31}, (_, i) => {
+    const mins = i * 15;
+    const h = 8 + Math.floor(mins / 60);
+    const m = (mins % 60).toString().padStart(2, '0');
+    return `${h}:${m}`;
+  });
+
+  const timeCtx = document.getElementById('globalTimeOfDayChart').getContext('2d');
+  charts['globalTimeOfDayChart'] = new Chart(timeCtx, {
+    type: 'bar',
+    data: {
+      labels: timeLabels,
+      datasets: [{ label: 'All Incidents across Day (8:00 - 3:30)', data: data.timeBins, backgroundColor: '#ec4899' }]
     },
     options: { responsive: true, maintainAspectRatio: false }
   });
