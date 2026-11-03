@@ -2,6 +2,7 @@
   --bg: #f4f7f6;
   --surface: #ffffff;
   --primary: #2563eb;
+  --secondary: #4f46e5;
   --text: #1e293b;
   --border: #e2e8f0;
 }
@@ -29,6 +30,22 @@ body {
   overflow-y: auto;
 }
 
+.left-panel-narrow {
+  background: var(--surface);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  width: 250px;
+  flex-shrink: 0;
+}
+
+.subtitle {
+  font-size: 0.9em;
+  color: #64748b;
+  line-height: 1.4;
+  margin-top: 10px;
+}
+
 .hidden {
   display: none !important;
 }
@@ -36,6 +53,7 @@ body {
 .list {
   list-style: none;
   padding: 0;
+  margin-top: 15px;
   margin-bottom: 20px;
 }
 
@@ -81,6 +99,20 @@ body {
 
 .btn.primary:hover {
   background: #1d4ed8;
+}
+
+.btn.secondary {
+  background: var(--secondary);
+  color: white;
+}
+
+.btn.secondary:hover {
+  background: #4338ca;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 10px;
 }
 
 .btn.add-btn {
@@ -134,7 +166,7 @@ body {
 }
 
 .chart-container {
-  height: 250px;
+  height: 280px;
   width: 100%;
   position: relative;
 }
