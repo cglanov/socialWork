@@ -2,6 +2,8 @@
 const API_URL = 'https://script.google.com/macros/s/AKfycbxHJg2r1zkY5PgAYPYA-DiSHfgeu1A-nvkkDm5FXHoGCJRENx-f9kphPSEq300XqLk/exec';
 
 let charts = {};
+let allBehaviorsList = [];
+let currentStudentData = null;
 
 window.onload = () => {
   fetch(`${API_URL}?action=getInitialData`)
@@ -11,9 +13,12 @@ window.onload = () => {
 };
 
 function renderMainView(data) {
-  const bList = document.getElementById('behavior-list');
-  if (bList && data.behaviors) {
-    bList.innerHTML = data.behaviors.map(b => `<li>${b}</li>`).join('');
+  if (data.behaviors) {
+    allBehaviorsList = data.behaviors;
+    const bList = document.getElementById('behavior-list');
+    if (bList) {
+      bList.innerHTML = data.behaviors.map(b => `<li>${b}</li>`).join('');
+    }
   }
 
   const sList = document.getElementById('student-list');
@@ -82,16 +87,72 @@ function addInstance(studentName, colIndex) {
 
 function renderStudentView(data) {
   if (!data) return;
+  currentStudentData = data;
   
   const list = document.getElementById('student-behavior-list');
-  list.innerHTML = data.behaviors.map(b => `
-    <li>
-      <span>${b.name} <span class="badge">${b.count}</span></span>
-      <button class="btn add-btn" onclick="addInstance('${data.studentName}', ${b.colIndex})">+</button>
-    </li>
-  `).join('');
+  const activeBehaviors = data.behaviors.filter(b => b.isActive !== false);
+  
+  if (activeBehaviors.length === 0) {
+    list.innerHTML = '<li><em>No target behaviors assigned. Click "Edit Target Behaviors" above to add some.</em></li>';
+  } else {
+    list.innerHTML = activeBehaviors.map(b => `
+      <li>
+        <span>${b.name} <span class="badge">${b.count}</span></span>
+        <button class="btn add-btn" onclick="addInstance('${data.studentName}', ${b.colIndex})">+</button>
+      </li>
+    `).join('');
+  }
 
   renderStudentCharts(data);
+}
+
+/* Modal for Editing Target Behaviors */
+function openStudentBehaviorModal() {
+  if (!currentStudentData) return;
+  
+  const container = document.getElementById('student-behavior-checkboxes');
+  const activeNames = currentStudentData.activeBehaviorNames || [];
+  
+  container.innerHTML = allBehaviorsList.map(bName => {
+    const isChecked = activeNames.includes(bName) ? 'checked' : '';
+    return `
+      <label class="checkbox-item">
+        <input type="checkbox" value="${bName}" ${isChecked}>
+        <span>${bName}</span>
+      </label>
+    `;
+  }).join('');
+  
+  document.getElementById('student-behavior-modal').classList.remove('hidden');
+}
+
+function closeStudentBehaviorModal() {
+  document.getElementById('student-behavior-modal').classList.add('hidden');
+}
+
+function submitStudentBehaviors() {
+  if (!currentStudentData) return;
+  
+  const checkboxes = document.querySelectorAll('#student-behavior-checkboxes input[type="checkbox"]');
+  const selectedBehaviors = [];
+  checkboxes.forEach(cb => {
+    if (cb.checked) selectedBehaviors.push(cb.value);
+  });
+  
+  closeStudentBehaviorModal();
+  document.getElementById('student-behavior-list').innerHTML = '<li>Updating behaviors...</li>';
+
+  fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify({ 
+      action: 'updateStudentBehaviors', 
+      studentName: currentStudentData.studentName, 
+      selectedBehaviors 
+    })
+  })
+  .then(res => res.json())
+  .then(renderStudentView)
+  .catch(err => console.error("Error updating student behaviors:", err));
 }
 
 function renderStudentCharts(data) {
@@ -99,12 +160,14 @@ function renderStudentCharts(data) {
     if (charts[id]) charts[id].destroy();
   });
 
+  const activeBehaviors = data.behaviors.filter(b => b.isActive !== false);
+
   const pieCtx = document.getElementById('pieChart').getContext('2d');
   charts['pieChart'] = new Chart(pieCtx, {
     type: 'pie',
     data: {
-      labels: data.behaviors.map(b => b.name),
-      datasets: [{ data: data.behaviors.map(b => b.count) }]
+      labels: activeBehaviors.map(b => b.name),
+      datasets: [{ data: activeBehaviors.map(b => b.count) }]
     },
     options: { responsive: true, maintainAspectRatio: false }
   });
@@ -139,7 +202,7 @@ function renderStudentCharts(data) {
     type: 'bar',
     data: {
       labels: timeLabels,
-      datasets: [{ label: 'Incidents (8:00 - 3:30)', data: timeBins, backgroundColor: '#3b82f6' }]
+      datasets: [{ label: 'Incidents (8:00 AM - 3:30 PM)', data: timeBins, backgroundColor: '#3b82f6' }]
     },
     options: { responsive: true, maintainAspectRatio: false }
   });
@@ -237,7 +300,7 @@ function renderGlobalCharts(data) {
     }
   });
 
-  // 4. Time of Day (8:00 - 3:30, 15m intervals)
+  // 4. Time of Day (8:00 AM - 3:30 PM, 15m intervals)
   const timeLabels = Array.from({length: 31}, (_, i) => {
     const mins = i * 15;
     const h = 8 + Math.floor(mins / 60);
