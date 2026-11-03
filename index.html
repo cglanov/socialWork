@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Behavior Tracker</title>
+  <!-- Chart.js Library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- External CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Main Dashboard View -->
+  <div id="main-view" class="container">
+    <div class="panel left-panel">
+      <h2>Target Behaviors</h2>
+      <ul id="behavior-list" class="list"></ul>
+      <button class="btn primary" onclick="openModal()">Add Target Behavior</button>
+    </div>
+    <div class="panel right-panel">
+      <h2>Students</h2>
+      <div id="student-list" class="button-grid"></div>
+    </div>
+  </div>
+
+  <!-- Student Detail View -->
+  <div id="student-view" class="container hidden">
+    <div class="panel left-panel">
+      <button class="btn" onclick="goBack()">← Back</button>
+      <h2 id="student-title">Student Behaviors</h2>
+      <ul id="student-behavior-list" class="list"></ul>
+    </div>
+    <div class="panel right-panel charts-panel">
+      <div class="chart-container"><canvas id="pieChart"></canvas></div>
+      <div class="chart-container"><canvas id="timeChart"></canvas></div>
+      <div class="chart-container"><canvas id="dayChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Add Behavior Modal -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <h3>New Target Behavior</h3>
+      <input type="text" id="new-behavior-input" placeholder="Enter behavior name...">
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn primary" onclick="submitBehavior()">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- External JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>
