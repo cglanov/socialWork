@@ -156,7 +156,6 @@ function renderStudentCharts(data) {
 }
 
 function loadGlobalBehaviorData() {
-  // Immediately switch screens
   document.getElementById('main-view').classList.add('hidden');
   document.getElementById('global-data-view').classList.remove('hidden');
 
@@ -185,27 +184,34 @@ function renderGlobalCharts(data) {
 
   const colorPalette = [
     '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', 
-    '#6366f1', '#14b8a6', '#f97316', '#06b6d4', '#84cc16'
+    '#6366f1', '#14b8a6', '#f97316', '#06b6d4', '#84cc16',
+    '#ef4444', '#a855f7', '#34d399', '#fbbf24'
   ];
 
-  // 1. Students Per Behavior
+  // 1. Students Per Behavior (Pie Chart)
   const spbCtx = document.getElementById('globalStudentsPerBehaviorChart').getContext('2d');
   charts['globalStudentsPerBehaviorChart'] = new Chart(spbCtx, {
-    type: 'bar',
+    type: 'pie',
     data: {
       labels: data.behaviorNames,
-      datasets: [{ label: 'Students assigned per Behavior', data: data.studentsPerBehavior, backgroundColor: '#3b82f6' }]
+      datasets: [{
+        data: data.studentsPerBehavior,
+        backgroundColor: colorPalette.slice(0, data.behaviorNames.length)
+      }]
     },
     options: { responsive: true, maintainAspectRatio: false }
   });
 
-  // 2. Instances Per Behavior
+  // 2. Total Instances Per Behavior (Pie Chart)
   const ipbCtx = document.getElementById('globalInstancesPerBehaviorChart').getContext('2d');
   charts['globalInstancesPerBehaviorChart'] = new Chart(ipbCtx, {
-    type: 'bar',
+    type: 'pie',
     data: {
       labels: data.behaviorNames,
-      datasets: [{ label: 'Total Instances across all Students', data: data.instancesPerBehavior, backgroundColor: '#8b5cf6' }]
+      datasets: [{
+        data: data.instancesPerBehavior,
+        backgroundColor: colorPalette.slice(0, data.behaviorNames.length)
+      }]
     },
     options: { responsive: true, maintainAspectRatio: false }
   });
@@ -227,7 +233,6 @@ function renderGlobalCharts(data) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { title: { display: true, text: 'Behavior Prevalence by Grade Level' } },
       scales: { x: { stacked: true }, y: { stacked: true } }
     }
   });
@@ -245,7 +250,7 @@ function renderGlobalCharts(data) {
     type: 'bar',
     data: {
       labels: timeLabels,
-      datasets: [{ label: 'All Incidents across Day (8:00 - 3:30)', data: data.timeBins, backgroundColor: '#ec4899' }]
+      datasets: [{ label: 'All Incidents across Day (8:00 AM - 3:30 PM)', data: data.timeBins, backgroundColor: '#ec4899' }]
     },
     options: { responsive: true, maintainAspectRatio: false }
   });
