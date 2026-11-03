@@ -25,7 +25,7 @@
     </div>
   </div>
 
-  <!-- Global Behavior Data View (Full Page Layout) -->
+  <!-- Global Behavior Data View -->
   <div id="global-data-view" class="container full-page-view hidden">
     <div class="header-bar">
       <button class="btn" onclick="goBackFromGlobal()">← Back to Dashboard</button>
@@ -60,6 +60,7 @@
     <div class="panel left-panel">
       <button class="btn" onclick="goBack()">← Back</button>
       <h2 id="student-title">Student Behaviors</h2>
+      <button class="btn secondary full-width" onclick="openStudentBehaviorModal()">Edit Target Behaviors</button>
       <ul id="student-behavior-list" class="list"></ul>
     </div>
     <div class="panel right-panel charts-panel">
@@ -77,6 +78,19 @@
       <div class="modal-actions">
         <button class="btn" onclick="closeModal()">Cancel</button>
         <button class="btn primary" onclick="submitBehavior()">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manage Student Behaviors Modal -->
+  <div id="student-behavior-modal" class="modal hidden">
+    <div class="modal-content modal-large">
+      <h3>Manage Target Behaviors</h3>
+      <p class="subtitle">Select behaviors to track for this student:</p>
+      <div id="student-behavior-checkboxes" class="checkbox-list"></div>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeStudentBehaviorModal()">Cancel</button>
+        <button class="btn primary" onclick="submitStudentBehaviors()">Confirm Changes</button>
       </div>
     </div>
   </div>
