@@ -6,17 +6,22 @@ let charts = {};
 window.onload = () => {
   fetch(`${API_URL}?action=getInitialData`)
     .then(res => res.json())
-    .then(renderMainView);
+    .then(renderMainView)
+    .catch(err => console.error("Error loading initial data:", err));
 };
 
 function renderMainView(data) {
   const bList = document.getElementById('behavior-list');
-  bList.innerHTML = data.behaviors.map(b => `<li>${b}</li>`).join('');
+  if (bList && data.behaviors) {
+    bList.innerHTML = data.behaviors.map(b => `<li>${b}</li>`).join('');
+  }
 
   const sList = document.getElementById('student-list');
-  sList.innerHTML = data.students.map(s => 
-    `<button class="btn" onclick="loadStudent('${s}')">${s}</button>`
-  ).join('');
+  if (sList && data.students) {
+    sList.innerHTML = data.students.map(s => 
+      `<button class="btn" onclick="loadStudent('${s}')">${s}</button>`
+    ).join('');
+  }
 }
 
 function openModal() { 
@@ -38,7 +43,8 @@ function submitBehavior() {
     body: JSON.stringify({ action: 'addBehavior', behavior: val })
   })
   .then(res => res.json())
-  .then(renderMainView);
+  .then(renderMainView)
+  .catch(err => console.error("Error submitting behavior:", err));
 }
 
 function loadStudent(name) {
@@ -50,7 +56,8 @@ function loadStudent(name) {
 
   fetch(`${API_URL}?action=getStudentData&studentName=${encodeURIComponent(name)}`)
     .then(res => res.json())
-    .then(renderStudentView);
+    .then(renderStudentView)
+    .catch(err => console.error("Error loading student data:", err));
 }
 
 function goBack() {
@@ -69,7 +76,8 @@ function addInstance(studentName, colIndex) {
     body: JSON.stringify({ action: 'addBehaviorInstance', studentName, colIndex })
   })
   .then(res => res.json())
-  .then(renderStudentView);
+  .then(renderStudentView)
+  .catch(err => console.error("Error adding instance:", err));
 }
 
 function renderStudentView(data) {
@@ -148,12 +156,26 @@ function renderStudentCharts(data) {
 }
 
 function loadGlobalBehaviorData() {
+  // Immediately switch screens
   document.getElementById('main-view').classList.add('hidden');
   document.getElementById('global-data-view').classList.remove('hidden');
 
   fetch(`${API_URL}?action=getGlobalBehaviorData`)
-    .then(res => res.json())
-    .then(renderGlobalCharts);
+    .then(res => {
+      if (!res.ok) throw new Error("HTTP network response was not OK");
+      return res.json();
+    })
+    .then(data => {
+      if (data.error) {
+        alert("Server error: " + data.error);
+        return;
+      }
+      renderGlobalCharts(data);
+    })
+    .catch(err => {
+      console.error("Error fetching global behavior data:", err);
+      alert("Failed to load global data. Check console for details.");
+    });
 }
 
 function renderGlobalCharts(data) {
