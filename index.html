@@ -15,13 +15,28 @@
   <div id="main-view" class="container">
     <div class="panel left-panel">
       <h2>Target Behaviors</h2>
-      <!-- Button placed at the top of the panel -->
-      <button class="btn primary" onclick="openModal()" style="margin-bottom: 15px; width: 100%;">Add Target Behavior</button>
+      <button class="btn primary full-width" onclick="openModal()">Add Target Behavior</button>
+      <button class="btn secondary full-width" onclick="loadGlobalBehaviorData()">Data by Behavior</button>
       <ul id="behavior-list" class="list"></ul>
     </div>
     <div class="panel right-panel">
       <h2>Students</h2>
       <div id="student-list" class="button-grid"></div>
+    </div>
+  </div>
+
+  <!-- Global Behavior Data View -->
+  <div id="global-data-view" class="container hidden">
+    <div class="panel left-panel-narrow">
+      <button class="btn" onclick="goBackFromGlobal()">← Back</button>
+      <h2>Data by Behavior</h2>
+      <p class="subtitle">Aggregate trends across all students, grades, and time slots.</p>
+    </div>
+    <div class="panel right-panel charts-panel">
+      <div class="chart-container"><canvas id="globalStudentsPerBehaviorChart"></canvas></div>
+      <div class="chart-container"><canvas id="globalInstancesPerBehaviorChart"></canvas></div>
+      <div class="chart-container"><canvas id="globalGradePrevalenceChart"></canvas></div>
+      <div class="chart-container"><canvas id="globalTimeOfDayChart"></canvas></div>
     </div>
   </div>
 
