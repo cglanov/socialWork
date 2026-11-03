@@ -25,18 +25,33 @@
     </div>
   </div>
 
-  <!-- Global Behavior Data View -->
-  <div id="global-data-view" class="container hidden">
-    <div class="panel left-panel-narrow">
-      <button class="btn" onclick="goBackFromGlobal()">← Back</button>
-      <h2>Data by Behavior</h2>
-      <p class="subtitle">Aggregate trends across all students, grades, and time slots.</p>
+  <!-- Global Behavior Data View (Full Page Layout) -->
+  <div id="global-data-view" class="container full-page-view hidden">
+    <div class="header-bar">
+      <button class="btn" onclick="goBackFromGlobal()">← Back to Dashboard</button>
+      <div>
+        <h2>Data by Behavior</h2>
+        <p class="subtitle">Aggregate trends across all students, grades, and time slots.</p>
+      </div>
     </div>
-    <div class="panel right-panel charts-panel">
-      <div class="chart-container"><canvas id="globalStudentsPerBehaviorChart"></canvas></div>
-      <div class="chart-container"><canvas id="globalInstancesPerBehaviorChart"></canvas></div>
-      <div class="chart-container"><canvas id="globalGradePrevalenceChart"></canvas></div>
-      <div class="chart-container"><canvas id="globalTimeOfDayChart"></canvas></div>
+    
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3>Students per Behavior</h3>
+        <div class="chart-container"><canvas id="globalStudentsPerBehaviorChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Total Instances per Behavior</h3>
+        <div class="chart-container"><canvas id="globalInstancesPerBehaviorChart"></canvas></div>
+      </div>
+      <div class="chart-card full-width-card">
+        <h3>Prevalence by Grade Level</h3>
+        <div class="chart-container"><canvas id="globalGradePrevalenceChart"></canvas></div>
+      </div>
+      <div class="chart-card full-width-card">
+        <h3>Incidents by Time of Day (8:00 AM - 3:30 PM)</h3>
+        <div class="chart-container"><canvas id="globalTimeOfDayChart"></canvas></div>
+      </div>
     </div>
   </div>
 
